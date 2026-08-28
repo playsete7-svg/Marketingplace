@@ -132,7 +132,7 @@ async function updateOrderInStore(orderId, statusUpdate, store) {
     history.push({ at: Date.now(), status: statusUpdate.status || "updated", message: statusUpdate.message || "" });
     patch.statusHistory = history;
 
-    return await supremoRestWrite(store.projectId, store.apiKey, "orders", orderId, patch);
+    return await (window.supremoRestMergeWrite || supremoRestWrite)(store.projectId, store.apiKey, "orders", orderId, patch);
   } catch (error) {
     console.error("[Bridge1] Falha ao atualizar pedido na loja:", error);
     return { ok: false, error: error.message };

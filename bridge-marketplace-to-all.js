@@ -47,7 +47,7 @@ async function syncOrderToCRMandGestor(order) {
   ];
 
   const results = await Promise.allSettled(
-    targets.map(t => supremoRestWrite(t.cfg.projectId, t.cfg.apiKey, t.collection, order.id, orderPayload))
+    targets.map(t => (window.supremoRestMergeWrite || supremoRestWrite)(t.cfg.projectId, t.cfg.apiKey, t.collection, order.id, orderPayload))
   );
 
   results.forEach((r, i) => {
@@ -69,9 +69,15 @@ async function syncCustomerToCRMandGestor(customer) {
   const userPayload = {
     id: customer.id || customer.uid || "",
     uid: customer.uid || customer.id || "",
-    name: customer.name || "",
+    name: customer.name || customer.displayName || "",
+    displayName: customer.displayName || customer.name || "",
     email: customer.email || "",
     phone: customer.phone || "",
+    addresses: Array.isArray(customer.addresses) ? customer.addresses : [],
+    savedAddresses: Array.isArray(customer.savedAddresses) ? customer.savedAddresses : [],
+    savedAddressRecords: Array.isArray(customer.savedAddressRecords) ? customer.savedAddressRecords : [],
+    defaultAddressId: customer.defaultAddressId || null,
+    preferences: customer.preferences || { transactional: true, marketing: false },
     role: "customer",
     source: "marketplace",
     createdAt: customer.createdAt || Date.now(),
@@ -89,7 +95,7 @@ async function syncCustomerToCRMandGestor(customer) {
   ];
 
   const results = await Promise.allSettled(
-    targets.map(t => supremoRestWrite(t.cfg.projectId, t.cfg.apiKey, t.collection, userPayload.id, userPayload))
+    targets.map(t => (window.supremoRestMergeWrite || supremoRestWrite)(t.cfg.projectId, t.cfg.apiKey, t.collection, userPayload.id, userPayload))
   );
 
   results.forEach((r, i) => {
