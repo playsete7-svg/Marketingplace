@@ -65,6 +65,33 @@ async function syncOrderToCRMandGestor(order) {
  * Replica um cliente (usuario) para a Central de Clientes e o Gestor.
  * Chamada apos criar/alterar conta no marketplace.
  */
+async function syncAllCustomersToCRMandGestor(localCustomers = [], storeConfigs = []) {
+  const byKey = new Map();
+  const add = customer => {
+    if (!customer) return;
+    const key = String(customer.uid || customer.id || customer.email || customer.phone || '').trim().toLowerCase();
+    if (!key) return;
+    const safe = { ...customer };
+    delete safe.password;
+    delete safe.passwordHash;
+    byKey.set(key, { ...(byKey.get(key) || {}), ...safe });
+  };
+  (Array.isArray(localCustomers) ? localCustomers : []).forEach(add);
+  for (const store of Array.isArray(storeConfigs) ? storeConfigs : []) {
+    const cfg = { ...(store.firebaseConfig || {}), ...(store || {}) };
+    if (!cfg?.projectId || !cfg?.apiKey) continue;
+    try {
+      const collectionName = cfg.customerCollection || 'users';
+      const remoteUsers = await (window.supremoRestReadCollection || supremoRestReadCollection)(cfg.projectId, cfg.apiKey, collectionName);
+      remoteUsers.forEach(user => add({ ...user, source: `store:${store.id || cfg.projectId}`, storeId: store.id || cfg.projectId, storeName: store.name || cfg.name || '' }));
+    } catch (error) {
+      console.warn('[Bridge5] Não foi possível ler clientes da loja:', store.name || cfg.projectId, error?.message || error);
+    }
+  }
+  const results = await Promise.allSettled([...byKey.values()].map(syncCustomerToCRMandGestor));
+  return { ok: results.some(result => result.status === 'fulfilled' && result.value?.ok), total: byKey.size };
+}
+
 async function syncCustomerToCRMandGestor(customer) {
   const userPayload = {
     id: customer.id || customer.uid || "",
@@ -112,4 +139,5 @@ async function syncCustomerToCRMandGestor(customer) {
 if (typeof window !== "undefined") {
   window.syncOrderToCRMandGestor = syncOrderToCRMandGestor;
   window.syncCustomerToCRMandGestor = syncCustomerToCRMandGestor;
+  window.syncAllCustomersToCRMandGestor = syncAllCustomersToCRMandGestor;
 }
