@@ -1002,6 +1002,39 @@
   }
 </style>
 
+<style id="marketplace-selective-spacing-v19">
+  /* Nova redução sutil dos títulos públicos. */
+  #homeView .discovery-section .section-head h2 {
+    font-size: clamp(20px, 2.25vw, 27px);
+  }
+  /* Aproximação vertical moderada entre todas as seções. */
+  #homeView > .discovery-section {
+    padding-top: 30px;
+  }
+  /* Categorias e Flyers mantêm as margens externas da versão anterior. */
+  @media (min-width: 861px) {
+    #homeView > .discovery-section:not(.store-categories-section):not(.flyer-section) {
+      width: calc(100% - 36px) !important;
+      margin-left: 18px !important;
+      margin-right: 18px !important;
+    }
+  }
+  @media (max-width: 860px) {
+    #homeView > .discovery-section {
+      padding-top: 24px;
+    }
+    #homeView .discovery-section .section-head h2 {
+      font-size: 20px;
+    }
+    #homeView > .discovery-section:not(.store-categories-section):not(.flyer-section) {
+      width: calc(100% - 16px) !important;
+      margin-left: 8px !important;
+      margin-right: 8px !important;
+    }
+  }
+</style>
+
+
 
 
 </head>
