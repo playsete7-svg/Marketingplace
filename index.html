@@ -966,6 +966,43 @@
   }
 </style>
 
+<style id="marketplace-final-visual-refinements-v18">
+  /* Refinamento sutil: títulos menores e respiro vertical mais compacto. */
+  #homeView .discovery-section .section-head h2 {
+    font-size: clamp(22px, 2.5vw, 30px);
+  }
+  #homeView > .discovery-section {
+    padding-top: 36px;
+  }
+  #homeView .discovery-section .section-head {
+    margin-bottom: 10px;
+  }
+  /* Todas as seções ficam um pouco mais próximas dos limites, sem encostar. */
+  @media (min-width: 861px) {
+    #homeView > .section,
+    #homeView > .discovery-search-top {
+      width: calc(100% - 48px) !important;
+      margin-left: 24px !important;
+      margin-right: 24px !important;
+    }
+  }
+  @media (max-width: 860px) {
+    #homeView > .section,
+    #homeView > .discovery-search-top {
+      width: calc(100% - 24px) !important;
+      margin-left: 12px !important;
+      margin-right: 12px !important;
+    }
+    #homeView > .discovery-section {
+      padding-top: 29px;
+    }
+    #homeView .discovery-section .section-head h2 {
+      font-size: 22px;
+    }
+  }
+</style>
+
+
 
 </head>
 <body>
@@ -1149,7 +1186,7 @@
     function famousStores(stores){const ranked=stores.slice().sort((a,b)=>(Number(Boolean(b.famous||b.featured||b.sponsored))*100000+Number(b.sales||b.orders||0))-(Number(Boolean(a.famous||a.featured||a.sponsored))*100000+Number(a.sales||a.orders||0)));return ranked.length?ranked:stores}
     function recommendedStores(stores){return stores.slice().sort((a,b)=>(Number(Boolean(b.featured||b.highlighted))*100000+Number(b.sales||b.orders||0)+Number(b.rating||b.averageRating||0)*100)-(Number(Boolean(a.featured||a.highlighted))*100000+Number(a.sales||a.orders||0)+Number(a.rating||a.averageRating||0)*100))}
     function activeFlyers(){const cfg=state.marketplaceConfig||marketplaceConfig(),now=Date.now(),categories=marketplaceStoreCategories();return(Array.isArray(cfg.flyers)?cfg.flyers:[]).filter(flyer=>{if(!flyer||flyer.enabled===false)return false;const startsOk=!flyer.startsAt||new Date(flyer.startsAt).getTime()<=now,endsOk=!flyer.endsAt||new Date(flyer.endsAt).getTime()>=now;if(!startsOk||!endsOk)return false;const type=String(flyer.targetType||'none'),target=String(flyer.targetValue||''),hasContent=Boolean(safeUrl(flyer.imageUrl||flyer.image)||String(flyer.title||flyer.subtitle||'').trim()),validTarget=type==='store'?state.stores.some(store=>store.id===target):type==='category'?(target==='all'||categories.some(category=>category.id===target)):true;return hasContent&&validTarget}).sort((a,b)=>(Number(b.priority)||0)-(Number(a.priority)||0))}
-    function flyerMarkup(flyer){const imageUrl=safeUrl(flyer.imageUrl||flyer.image),title=flyer.title||'Destaque do Supremo',targetType=flyer.targetType||'none',targetValue=String(flyer.targetValue||'');if(targetType==='store'){const store=state.stores.find(item=>item.id===targetValue);return store?`<a class="flyer-card" href="${esc(storeHref(store))}" data-store-link data-store="${esc(store.id)}" aria-label="${esc(title)}" style="${imageUrl?`background-image:linear-gradient(90deg,rgba(18,10,7,.78),rgba(18,10,7,.16)),url('${imageUrl}')`:''}"><span><small>Campanha da loja</small><strong>${esc(title)}</strong><em>${esc(flyer.subtitle||'Ver oferta')}</em></span></a>`:''}if(targetType==='category'){return`<button class="flyer-card" data-action="flyer-category" data-category="${esc(targetValue)}" style="${imageUrl?`background-image:linear-gradient(90deg,rgba(18,10,7,.78),rgba(18,10,7,.16)),url('${imageUrl}')`:''}"><span><small>Seleção por categoria</small><strong>${esc(title)}</strong><em>${esc(flyer.subtitle||'Explorar agora')}</em></span></button>`}return`<div class="flyer-card is-placeholder" style="${imageUrl?`background-image:linear-gradient(90deg,rgba(18,10,7,.78),rgba(18,10,7,.16)),url('${imageUrl}')`:''}"><span><small>Espaço promocional</small><strong>${esc(title)}</strong><em>${esc(flyer.subtitle||'Configure o destino no Supremo')}</em></span></div>`}
+    function flyerMarkup(flyer){const imageUrl=safeUrl(flyer.imageUrl||flyer.image),title=flyer.title||'Destaque do Supremo',targetType=flyer.targetType||'none',targetValue=String(flyer.targetValue||''),imageStyle=imageUrl?`background-image:url('${imageUrl}')`:'';if(targetType==='store'){const store=state.stores.find(item=>item.id===targetValue);return store?`<a class="flyer-card" href="${esc(storeHref(store))}" data-store-link data-store="${esc(store.id)}" aria-label="${esc(title)}" style="${imageStyle}"></a>`:''}if(targetType==='category'){return`<button class="flyer-card" data-action="flyer-category" data-category="${esc(targetValue)}" aria-label="${esc(title)}" style="${imageStyle}"></button>`}return`<div class="flyer-card is-placeholder" aria-label="${esc(title)}" style="${imageStyle}"></div>`}
     function initInfiniteMarketplaceRail(rail,itemSelector,navSelector,cloneKey){
       if(!rail)return;
       const carousel=rail.parentElement,realCards=[...rail.querySelectorAll(itemSelector)].filter(card=>card.dataset[cloneKey]!=='true');
